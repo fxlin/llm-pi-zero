@@ -11,6 +11,8 @@
   - 2in13_V4, 250x122
   - https://www.waveshare.com/wiki/2.13inch_Touch_e-Paper_HAT_Manual
 
+Whole system ~= 2.5 Watt when busy, ~= 1 Watt when idle (can be optimized)
+
 **Total:** ~$65
 
 While the ePaper is not specifically designed for the Orange Pi, it has good pin compatibility with the Raspberry Pi Zero 2W. Most changes involve adjusting the SPI (for display) and I2C (for touch) bus numbers. Refer to `epdconfig_ori.py` for details.
