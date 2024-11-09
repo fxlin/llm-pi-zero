@@ -1,10 +1,12 @@
 ## ePaper UI for Rendering LLM Inference on Pi Zero
 
+This project is a simple ePaper UI for rendering LLM inference results on a Pi Zero. 
+The UI is designed to be simple and low power, with a focus on readability and minimalism. The UI is designed to be used with the [RWKV](https://pypi.org/project/rwkv/) library, but can be easily adapted to other LLM inference libraries.
+
 ![alt text](20241104_154924.jpg)
 
-![ePaper UI](https://github.com/user-attachments/assets/98b9d58a-7660-4d4d-97ee-e885c9d1ae21)
 
-
+<video controls src="rwkv-demo-powermeter.mp4" title="Title"></video>
 
 ## Hardware
 
