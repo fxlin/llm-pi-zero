@@ -77,4 +77,5 @@ pip install -e Touch_e-Paper_Code/python
 ```
 EMU=1 python3 pi-demo.py
 ```
-will send a hardcoded message to 
+will send a hardcoded message to the UI for rendering.
+
