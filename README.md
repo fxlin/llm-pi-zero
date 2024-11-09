@@ -1,5 +1,4 @@
-LLM on Pi Zero
-
+## ePaper UI for rendering LLM inference on Pi Zero (Raspberry Pi, Orange Pi)
 
 ### Run all commands below as root
 
