@@ -4,6 +4,8 @@
 
 ![ePaper UI](https://github.com/user-attachments/assets/98b9d58a-7660-4d4d-97ee-e885c9d1ae21)
 
+
+
 ## Hardware
 
 - Orange Pi Zero 2W (4GB) - $35 [Amazon](https://www.amazon.com/gp/product/B0CHM7HN8P/ref=ppx_yo_dt_b_asin_title_o00_s00?ie=UTF8&th=1)
