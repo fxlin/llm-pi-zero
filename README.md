@@ -1,8 +1,8 @@
 ## ePaper UI for rendering LLM inference on Pi Zero 
 
 tested on: 
-[x] Orange Pi Zero 2W
-[ ] Raspberry Pi Zero 2W
+- [x] Orange Pi Zero 2W
+- [ ] Raspberry Pi Zero 2W
 
 ### Run all commands below as root
 
