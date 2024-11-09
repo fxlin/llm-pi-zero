@@ -5,8 +5,7 @@ The UI is designed to be simple and low power, with a focus on readability and m
 
 ![alt text](20241104_154924.jpg)
 
-
-<video controls src="rwkv-demo-powermeter.mp4" title="Title"></video>
+https://raw.githubusercontent.com/fxlin/llm-pi-zero/main/rwkv-demo-powermeter.mp4
 
 ## Hardware
 
