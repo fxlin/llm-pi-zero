@@ -21,9 +21,12 @@ if os.environ.get("EMU") != '1':
 import threading
 
 ######## choice of models #############
+# official models
+model_path='/data/models/pi-deployment/RWKV-5-World-0.1B-v1-20230803-ctx4096'
+# our own models
 # model_path='/data/models/pi-deployment/01b-pre-x52-1455'
 # model_path='/data/models/pi-deployment/04b-pre-x59-2405'  # <--- works for demo
-model_path='/data/models/pi-deployment/04b-pre-x59-860'  # <--- works for demo
+# model_path='/data/models/pi-deployment/04b-pre-x59-860'  # <--- works for demo
 #######################################
 
 # run chat app on the inference engine (rwkv), check for sanity 

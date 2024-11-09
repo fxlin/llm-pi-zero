@@ -1,0 +1,10 @@
+[Unit]
+Description=rwkv on epaper demo
+
+[Service]
+ExecStart=/root/workspace-rwkv/llm-epaper-demo/launch.sh
+WorkingDirectory=/root/workspace-rwkv/llm-epaper-demo
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
