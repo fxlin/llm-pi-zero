@@ -1,0 +1,103 @@
+#deployment 
+
+sudo apt-get install python3-dev
+
+cd ~/workspace-waveshare/e-Paper/RaspberryPi_JetsonNano/python
+pip install -e . 
+pip install spidev
+pip install gpiozero
+pip install lgpio
+pip install psutil
+pip install Pillow
+pip install smbus
+
+https://www.waveshare.com/wiki/2.13inch_Touch_e-Paper_HAT_Manual#python
+
+
+# touch lib (TP_lib, in fact only needs this l-- both display and touch ) 
+cd ~/workspace-waveshare/example/python
+python setup.py develop
+# if for root, has to be 
+sudo python setup.py develop
+
+"TP lib" is a nweer version
+
+python3 -m venv myenv
+pip install numpy
+pip install spidev
+pip install gpiozero
+
+# partial, focus on touch features
+cd ~/workspace-waveshare/Touch_e-Paper_Code
+source ~/workspace-waveshare/Touch_e-Paper_Code/env-pi.sh
+python3 python/examples/TP2in13_V4_test.py
+
+
+
+cd /home/orangepi/workspace-rwkv/RWKV-LM/rwkv/pi-epaper-demo
+source env-pi.sh
+export RWKV_NEON_ON=0
+python3 pi-demo0-opi.py
+
+# better ex, from ePaper repo
+https://github.com/waveshareteam/e-Paper/blob/master/RaspberryPi_JetsonNano/python/examples/epd_2in13_V4_test.py
+
+sudo python3 epd_2in13_V4_test.py
+
+####################################
+# orange pi
+# conclusion -- use root. otherwise super tedious
+#   b/c wiringOP needs /dev/mem, which requires root. 
+(change permission on /dev/mem wont work; it seems kernel enforces the restriction)
+
+sudo su
+source env-pi.sh 
+python3 pi-demo.py
+
+better use root from the beginning (as the manual indicates
+
+permission problem /dev/spiXXX
+https://chatgpt.com/share/6727e6ab-ac00-8004-a825-3ac41d3e16db
+it's owned by group "root". make it owned by "spi"
+
+sudo groupadd spi
+sudo usermod -aG spi $(whoami)
+
+
+sudo nano /etc/udev/rules.d/99-spidev.rules
+# add
+KERNEL=="spidev*", GROUP="spi", MODE="0660"
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
+<CANNOT DO THIS> pip3 install wiringpi
+must build from source, which is much newer (4.0.2)
+cf "3.21. How to install and use wiringOP-Python" manual pp 166
+
+# check
+python3 -c "import wiringpi; help(wiringpi)"
+
+python3 -c "import wiringpi; \
+from wiringpi import GPIO; wiringpi.wiringPiSetup() ; \
+wiringpi.pinMode(2, GPIO.OUTPUT) ; "
+
+####################################
+
+displayPartBaseImage(buffer):
+
+This function is used to display the base image for partial updates. It takes a
+buffer (usually created using epd.getbuffer()) that contains the initial content
+of the image you want to display
+
+displayPartial(buffer):
+used to update only a part of the display instead of refreshing the entire screen, which
+
+
+
+ref: 
+Floyd-Steinberg (dithering algo
+https://www.waveshare.com/wiki/E-Paper_Floyd-Steinberg
+
+pwnagotchi
+https://github.com/evilsocket/pwnagotchi
+https://www.waveshare.com/wiki/Template:2.13inch_e-Paper_HAT%2B_Pwn
