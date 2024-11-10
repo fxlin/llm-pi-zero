@@ -27,6 +27,9 @@ While the ePaper is not specifically designed for the Orange Pi, it has good pin
 - Orange Pi Zero 2W Extension Board - $15 [Amazon](https://www.amazon.com/gp/product/B0CHMTT4XP/ref=ppx_yo_dt_b_asin_title_o00_s00?ie=UTF8&th=1) - For ease of development
 - USB Power Tester - $20 [Amazon](https://www.amazon.com/dp/B07JYVPLLJ?ref=ppx_yo2ov_dt_b_fed_asin_title)
 
+### Also tested 
+
+- **Raspberry Pi 5**
 
 ### TODO
 
