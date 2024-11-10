@@ -473,6 +473,7 @@ class EInkDisplay:
 
 ###############  the model invoker #####################
 
+# default prompt
 # ex prompt from paper: https://arxiv.org/pdf/2305.07759
 prompt_list = [
     "\nUniversity of Virginia is",
@@ -487,6 +488,15 @@ prompt_list = [
 ]
 
 current_prompt = prompt_list[0]
+
+def load_prompts_from_file(file_path):
+    global prompt_list
+    if not os.path.isfile(file_path):
+        return
+
+    with open(file_path, 'r') as file:
+        prompt_list = [f"\n{line.strip()}" for line in file if line.strip()]
+
 pipeline=None
 
 def model_load(model_path):
@@ -615,7 +625,9 @@ def post_sys_msg(msg):
 if os.environ.get("EMU") != '1':
     post_sys_msg(f"Load {os.path.basename(model_path).replace('.pth', '')}... ")
     model_load(model_path)
-    post_sys_msg(f"Model loaded.READY  ")
+    post_sys_msg(f"Model loaded. READY")
+    if os.environ.get("PROMPT_PATH"):
+        load_prompts_from_file(os.environ.get("PROMPT_PATH"))
 else: 
     post_sys_msg(f"EMU mode")
 

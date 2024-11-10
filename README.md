@@ -36,6 +36,7 @@ While the ePaper is not specifically designed for the Orange Pi, it has good pin
 ## Software
 
 Use orangepi-config or raspi-config to enable SPI and I2C accesses.
+Cf the opi user manual. 
 
 ### Run All Commands Below as Root
 
@@ -146,3 +147,7 @@ systemctl enable pi-demo
 systemctl start pi-demo.service
 ```
 
+To save memory, disable the desktop
+```
+systemctl disable lightdm.service
+```
