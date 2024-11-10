@@ -676,8 +676,9 @@ try:
     t.start()
 
     # show the initial prompt
-    current_prompt = random.choice(prompt_list)
-    eink_display.print_token_scroll(current_prompt.replace('\n', ''))
+    current_prompt = random.choice(prompt_list).replace('\n', '')
+    for token in current_prompt.split():  # send by tokens, otherwise wont auto change line
+        eink_display.print_token_scroll(' '+token)
 
     # the main UI loop, touch event handling
     while (1):
