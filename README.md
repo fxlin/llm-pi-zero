@@ -35,6 +35,8 @@ While the ePaper is not specifically designed for the Orange Pi, it has good pin
 
 ## Software
 
+OS image: Orangepizero2w_1.0.2_ubuntu_jammy_server_linux6.1.31
+
 Use orangepi-config or raspi-config to enable SPI and I2C accesses.
 Cf the opi user manual. 
 
