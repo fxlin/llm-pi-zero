@@ -1,4 +1,4 @@
-## ePaper UI for Rendering LLM Inference on Pi Zero
+## LLM on Pi Zero
 
 This project is a simple ePaper UI for rendering LLM inference results on a Pi Zero. 
 The UI is designed to be simple and low power, with a focus on readability and minimalism. The UI is designed to be used with the [RWKV](https://pypi.org/project/rwkv/) library, but can be easily adapted to other LLM inference libraries.
@@ -27,6 +27,9 @@ While the ePaper is not specifically designed for the Orange Pi, it has good pin
 - Orange Pi Zero 2W Extension Board - $15 [Amazon](https://www.amazon.com/gp/product/B0CHMTT4XP/ref=ppx_yo_dt_b_asin_title_o00_s00?ie=UTF8&th=1) - For ease of development
 - USB Power Tester - $20 [Amazon](https://www.amazon.com/dp/B07JYVPLLJ?ref=ppx_yo2ov_dt_b_fed_asin_title)
 
+### Also tested 
+
+- **Raspberry Pi 5**
 
 ### TODO
 
