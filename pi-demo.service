@@ -1,8 +1,11 @@
+#  to be placed under /etc/systemd/system/
+
 [Unit]
 Description=rwkv on epaper demo
 
 [Service]
-ExecStart=/root/workspace-rwkv/llm-epaper-demo/launch.sh
+#ExecStart=/root/workspace-rwkv/llm-epaper-demo/launch.sh
+ExecStart=/boot/launch.sh
 WorkingDirectory=/root/workspace-rwkv/llm-epaper-demo
 Type=simple
 

@@ -136,9 +136,12 @@ My model paths are /data/models/pi-deployment/
 
 Enable the service to start on boot
 ```
+cp launch.sh /boot/
+# so that it can be easily modified from PC/Mac
+
 cp pi-demo.service /etc/systemd/system/
 systemctl enable pi-demo
 # launch it right now
-systemctl start myscript.service
+systemctl start pi-demo.service
 ```
 

@@ -44,6 +44,8 @@ if os.environ.get("RWKV_JIT_ON") != '0':
 if os.environ.get('RWKV_CUDA_ON') != '0':
     os.environ["RWKV_CUDA_ON"] = '1' #default
 
+if os.environ.get("MODEL_PATH"):
+    model_path = os.environ.get("MODEL_PATH")
 
 ###########
 # global vars, written by main thread (e.g. during model_gen()), 
