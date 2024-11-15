@@ -3,7 +3,7 @@
 This project is a simple ePaper UI for rendering LLM inference results on a Pi Zero. 
 The UI is designed to be simple and low power, with a focus on readability and minimalism. The UI is designed to be used with the [RWKV](https://pypi.org/project/rwkv/) library, but can be easily adapted to other LLM inference libraries.
 
-![alt text](20241104_154924.jpg)
+![image](https://github.com/user-attachments/assets/256335ae-d119-4793-bdc9-f9fd652511e2)
 
 https://raw.githubusercontent.com/fxlin/llm-pi-zero/main/rwkv-demo-powermeter.mp4
 
@@ -42,6 +42,11 @@ OS image: Orangepizero2w_1.0.2_ubuntu_jammy_server_linux6.1.31
 
 Use orangepi-config or raspi-config to enable SPI and I2C accesses.
 Cf the opi user manual. 
+
+Here is my selection that works:
+![image](https://github.com/user-attachments/assets/d1af70e9-b3d0-4be5-a19a-c1bf87d3800c)
+
+(if the program launches then quits, it could be b/c of that it failed to open the touch device on i2c. so check the selection)
 
 ### Run All Commands Below as Root
 
