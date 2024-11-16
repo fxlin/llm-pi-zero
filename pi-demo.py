@@ -33,11 +33,22 @@ import threading
 
 ######## choice of models #############
 # official models
-model_path='/data/models/pi-deployment/RWKV-5-World-0.1B-v1-20230803-ctx4096'
+# model_path='/data/models/pi-deployment/RWKV-5-World-0.1B-v1-20230803-ctx4096'
 # our own models
 # model_path='/data/models/pi-deployment/01b-pre-x52-1455'
+
+# model_path='/data/models/pi-deployment/04b-pre-x59-2405_fp16i8'
 # model_path='/data/models/pi-deployment/04b-pre-x59-2405'  # <--- works for demo
 # model_path='/data/models/pi-deployment/04b-pre-x59-860'  # <--- works for demo
+
+# model_path='/data/models/pi-deployment/1b5-pre-x59-929_fp16i8'
+model_path='/data/models/pi-deployment/1b5-pre-x59-929'
+
+# to be displayed on sys msg
+model_string=''
+# in GB, guessed 
+model_load_peak_gb = 1.0
+is_loading_model = False
 #######################################
 
 # run chat app on the inference engine (rwkv), check for sanity 
@@ -173,7 +184,7 @@ class EInkDisplay:
         end_time = time.time()  # End measuring time
         print(f"Clr time: {end_time - start_time:.4f} seconds")
 
-    def print_load_progress(self, progress, msg=None):
+    def draw_load_progress(self, progress, msg=None):
         # Ensure progress is between 0 and 1
         progress = max(0.0, min(progress, 1.0))
 
@@ -368,6 +379,7 @@ class EInkDisplay:
     # called by the "system info" thread, to render the sys info on the menu bar. 
     # b/c the menu bar area is disjoint vs. the text area, no lock needed vs. update_viewport()
     def draw_system_info(self, token_per_sec, sys_msg, model_load_prog=1.0):
+        global model_load_peak_gb, is_loading_model
         # print(f"draw sys info....{token_per_sec:.0f} tok/s, {sys_msg}")
 
         # Draw system information in a defined rectangle
@@ -406,7 +418,13 @@ class EInkDisplay:
         cpu_usage = f"{psutil.cpu_percent():.0f}%".rjust(3)
         cpu_temp = f"{self.get_cpu_temperature():.0f}C".rjust(3)
         process = psutil.Process(os.getpid())
-        mem_usage_str = self.format_memory_size(process.memory_info().rss).rjust(4)
+        mem_usage = process.memory_info().rss
+        mem_usage_str = self.format_memory_size(mem_usage).rjust(4)
+
+        mem_gb = mem_usage/(1024 * 1024 * 1024)
+        if is_loading_model and mem_gb < model_load_peak_gb:
+            self.draw_load_progress(mem_gb / model_load_peak_gb, 
+                                    (f"Load {os.path.basename(model_path).replace('.pth', '')}"))
 
         info_text_top = f"{tok_persec} tks {cpu_usage} {cpu_temp} {mem_usage_str}"
         self.base_draw.text((rect_x_start + 2, rect_y_start + 2), info_text_top, font=self.font_tiny, fill=0)
@@ -548,25 +566,72 @@ def load_prompts_from_file(file_path):
 pipeline=None
 
 def model_load(model_path):
-    global pipeline    
+    global pipeline, model_load_peak_gb, is_loading_model, model_string
+
     print(f'Loading model - {model_path}')
 
+    # guess model max memory usage
+    # format a string 
+    ver="??"
+    if "World" in model_path or "x52" in model_path:
+        ver="x52"
+    elif "x58" in model_path:
+        ver="x58"
+    elif "x59" in model_path:
+        ver="x59"
+    sz="??"
+    if "0.1B" in model_path or "01b" in model_path:
+        sz="01b"
+    elif "0.4B" in model_path or "04b" in model_path:
+        sz="04b"
+    elif "1B5" in model_path or "1b5" in model_path:
+        sz="1b5"
+    elif "3B" in model_path or "3b" in model_path:
+        sz="3b"
+    precision = "i8" if "fp16i8" in model_path else "fp16"
+    # note that if we load fp16 and convert to i8, it wont reduce model load max mem
+    model_string = f"{sz}-{ver}-{precision}"
+    # string->max mem (GB)
+    mem_table = {
+        "01b-x52-fp16":     0.6,   #??
+        "01b-x52-i8":       0.44, 
+        "01b-x59-fp16":     .67,
+        "01b-x59-i8":       .9,   
 
+        "04b-x52-fp16":     1.8,   #??
+        "04b-x59-fp16":     1.5,   
+        "04b-x59-i8":       1.3,
+
+        "1b5-x52-fp16":     4,      # ??
+        "1b5-x59-fp16":     4,      # steady state~=2.2G
+        "1b5-x59-i8":       1.5, #??
+    }
+    if model_string not in mem_table:
+        model_load_peak_gb = 1.5 # guessed
+        logging.error(f"model {model_string} not in mem_table, guessed {model_load_peak_gb} GB")
+    else:
+        model_load_peak_gb = mem_table[model_string]
+        logging.info(f"model {model_string}, guessed max mem use: {model_load_peak_gb} GB")
+    
     if os.environ["RWKV_CUDA_ON"] == '1':
         strategy='cuda fp16'
         # strategy='cuda fp16i8',
     else:    
-        #strategy='cpu fp16'
-        # strategy='cpu fp32'
-        strategy='cpu fp16i8'
+        # strategy='cpu fp16i8'
+        strategy='cpu fp16'
 
+    if precision == "i8":
+        strategy='cpu fp16i8'  # model is i8, so strategy enforced to be i8
+        
     t0 = time.time()
+    is_loading_model = True
     model = RWKV(model=model_path, 
                 strategy=strategy, 
                 verbose=True)
     #              head_K=200, load_token_cls='/data/home/xl6yq/workspace-rwkv/RWKV-LM/RWKV-v5/out/01b-cls-mine/from-hpc/rwkv-823-cls.npy')
 
     pipeline = PIPELINE(model, "rwkv_vocab_v20230424")
+    is_loading_model = False
     t1 = time.time()
 
     logging.info(f"model build: {(t1-t0):.2f} sec")
@@ -614,7 +679,7 @@ def model_gen(prompt=None, print_prompt=False):
 
     eink_display.print_token_scroll('■                                ')
     time.sleep(1) # wait for the last screen to be rendered
-    post_sys_msg(f"Done. {TOKEN_CNT}tk in {(t2-t1):.0f}s")
+    post_sys_msg(f"Done. {TOKEN_CNT}tk in {(t2-t1):.0f}s ({TOKEN_CNT/(t2-t1):.1f}tk/s)")
 
 ###############  touch device #####################
 TOUCH_POLL_INTERVAL = 0.1  # 100 ms
@@ -688,7 +753,7 @@ try:
     if os.environ.get("EMU") == '1':
         # first emulating loading model 
         for i in range(10):
-            eink_display.print_load_progress(i*1.0/10, "hello world, load model abcdefg....")
+            eink_display.draw_load_progress(i*1.0/10, "hello world, load model abcdefg....")
             time.sleep(1)
         text = '''
         In the heart of a bustling city lies a quaint little café, hidden away from the busy streets and towering skyscrapers. The café, named "The Hidden Petal," has an atmosphere that radiates warmth and nostalgia, reminiscent of a time when life moved more slowly and people lingered over their coffee without a care in the world. The walls are adorned with vintage photographs, faded floral wallpaper, and shelves lined with books of all sorts, inviting patrons to stay and lose themselves in their pages. Small wooden tables are arranged with a view of the large window, which frames a charming garden filled with colorful flowers and gentle vines. The aroma of freshly baked croissants, ground coffee beans, and the distant sound of soft jazz music fills the air, creating an ambiance that makes one want to curl up with a book and forget the passage of time. The patrons, a mix of regulars and curious newcomers, seem to speak in hushed tones, as if not wanting to disturb the delicate tranquility of the place. Here, it feels as if the hustle and hurry of the world are miles away, and for a moment, time stands still, allowing one to simply be
@@ -766,7 +831,7 @@ try:
             # "generate" button, numbers get based on ~20 touch tests using "min-touch-ex.py"
             elif touchx > 69 and touchx < 82 and touchy > 102:
                 logging.info("UI: gen")
-                post_sys_msg(f"Generating...")
+                post_sys_msg(f"{model_string}:Generating...")
                 model_gen(current_prompt)
             # "clear button", numbers get based on ~20 touch tests using "min-touch-ex.py"
             elif touchx > 111 and touchx < 126 and touchy > 104:
@@ -774,10 +839,10 @@ try:
                 post_sys_msg("Quitting...")
                 eink_display.stop()
                 flag_t = 0
-                time.sleep(1)
+                time.sleep(3)
                 eink_display.epd.Clear(0xFF)
                 # eink_display.epd.sleep()
-                time.sleep(2)
+                time.sleep(3)
                 t.join()
                 epd2in13_V4.epdconfig.module_exit()
                 exit()
