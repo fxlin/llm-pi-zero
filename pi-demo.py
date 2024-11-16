@@ -63,6 +63,7 @@ if os.environ.get("MODEL_PATH"):
 # read by UI thread (e.g. system info renderer)
 the_sys_msg = ""          # status msg 
 the_tok_persec = 0.0       # token per sec
+the_model_load_progress = 0.0  #0 to 1 
 # XXX lock them, oh well....
 
 ###########
@@ -300,7 +301,7 @@ class EInkDisplay:
     ################ the worker thread: for system info rendering  ################
 
     def system_info_update_worker(self):
-        global the_tok_persec, the_sys_msg
+        global the_tok_persec, the_sys_msg, the_model_load_progress
         
         while not self.stop_thread:
             with self.system_info_condition:
@@ -322,7 +323,7 @@ class EInkDisplay:
                 # the intention is to use the stale values. (how?)
                 # below goes w/o lock, for simplicity ... there's a race condition: 
                 # (see above) TBD...
-                self.system_info_condition.wait(timeout=1)
+                self.system_info_condition.wait(timeout=1)  # wakeup periodically
                 tok_persec = the_tok_persec
                 sys_msg = copy.deepcopy(the_sys_msg)
             # lock released, now draw
@@ -332,7 +333,7 @@ class EInkDisplay:
 
     # called by the "system info" thread, to render the sys info on the menu bar. 
     # b/c the menu bar area is disjoint vs. the text area, no lock needed vs. update_viewport()
-    def draw_system_info(self, token_per_sec, sys_msg):
+    def draw_system_info(self, token_per_sec, sys_msg, model_load_prog=1.0):
         # print(f"draw sys info....{token_per_sec:.0f} tok/s, {sys_msg}")
 
         # Draw system information in a defined rectangle
@@ -351,7 +352,10 @@ class EInkDisplay:
         self.base_draw.rectangle((rect_x_start, rect_y_start, rect_x_end, rect_y_end), fill=255)
 
         # Row 0: Display the_tok_persec, CPU util, temperature, and memory usage
-        tok_persec = f"{token_per_sec:.0f}".ljust(2)
+        if token_per_sec > 10:
+            tok_persec = f"{token_per_sec:.0f}".ljust(2)
+        else:
+            tok_persec = f"{token_per_sec:.1f}".ljust(2)
         
         # Marquee effect for the system message (if it has not changed since last drawing)
         # Pad sys_msg with spaces to the length of info_text_bottom_len
@@ -621,12 +625,14 @@ eink_display = EInkDisplay(picdir)
 
 def post_tks(tks):
     global the_tok_persec
+    logging.info(f"{tks:.2f} tok/s")
     with eink_display.system_info_condition:
         the_tok_persec = tks
         eink_display.system_info_condition.notify()
 
 def post_sys_msg(msg):
     global the_sys_msg
+    logging.info(f"sys_msg: {msg}")
     with eink_display.system_info_condition:
         the_sys_msg = msg
         eink_display.system_info_condition.notify()
@@ -635,7 +641,7 @@ def post_sys_msg(msg):
 if os.environ.get("EMU") != '1':
     post_sys_msg(f"Load {os.path.basename(model_path).replace('.pth', '')}... ")
     model_load(model_path)
-    post_sys_msg(f"Model loaded. READY")
+    post_sys_msg(f"READY")
     if os.environ.get("PROMPT_PATH"):
         load_prompts_from_file(os.environ.get("PROMPT_PATH"))
 else: 
