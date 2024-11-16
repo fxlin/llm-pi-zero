@@ -18,6 +18,17 @@ if os.environ.get("EMU") != '1':
     from rwkv.model import RWKV
     from rwkv.utils import PIPELINE, PIPELINE_ARGS
 
+import logging
+
+logging.basicConfig(
+    stream=sys.stderr,         # Log to stderr
+    level=logging.INFO,       # Set the minimum logging level to DEBUG
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  # Log message format
+    datefmt='%Y-%m-%d %H:%M:%S'  # Date-time format
+)
+
+logging.info("Starting the e-ink display and touch demo")
+
 import threading
 
 ######## choice of models #############
@@ -58,7 +69,6 @@ the_tok_persec = 0.0       # token per sec
 # epaper display (epd)
 # 2in13_V4, 250x122
 # https://www.waveshare.com/wiki/2.13inch_Touch_e-Paper_HAT_Manual
-import logging
 # from waveshare_epd import epd2in13_V4  # old lib, conflicts with TP_lib for GPIO pins
 from TP_lib import epd2in13_V4, gt1151
 from PIL import Image,ImageDraw,ImageFont
@@ -508,9 +518,9 @@ def model_load(model_path):
         strategy='cuda fp16'
         # strategy='cuda fp16i8',
     else:    
-        strategy='cpu fp16'
+        #strategy='cpu fp16'
         # strategy='cpu fp32'
-        # strategy='cpu fp16i8'
+        strategy='cpu fp16i8'
 
     t0 = time.time()
     model = RWKV(model=model_path, 
@@ -521,7 +531,7 @@ def model_load(model_path):
     pipeline = PIPELINE(model, "rwkv_vocab_v20230424")
     t1 = time.time()
 
-    print(f"model build: {(t1-t0):.2f} sec")
+    logging.info(f"model build: {(t1-t0):.2f} sec")
 
 # debubgging
 def my_print(s):
@@ -577,7 +587,7 @@ flag_t = 1
 # below polling???
 # ::Touch will be examined by class code of GT1151::GT_scan()
 def pthread_irq() :
-    print("touch dev poll thread: running")    
+    logging.info("touch poll thread: running")    
     while flag_t == 1 :
     # xzl: non blocking? inefficient...     
         if(gt.digital_read(gt.INT) == 0) :    
@@ -585,7 +595,7 @@ def pthread_irq() :
         else :
             GT_Dev.Touch = 0
         time.sleep(TOUCH_POLL_INTERVAL)     # 100 ms too much?
-    print("thread:exit")
+    logging.info("touch poll thread:exit")
 
 # transpose the touch x-y to be same as the display x-y
 def transpose_touch_inplace(dev, xres):
@@ -705,24 +715,25 @@ try:
             # Buttons for the UI
             # bottom-left corner, 35x35 button, "reload prompt"
             if touchx < 35 and touchy > eink_display.yres - 35:
-                print("reload")
+                logging.info("UI: reload")
                 eink_display.clear_text_area(False)
                 current_prompt = random.choice(prompt_list)
                 eink_display.print_token_scroll(current_prompt.replace('\n', ''))
-            # center x,y ~= 80,120
-            elif touchx > 70 and touchx < 90 and touchy > 110:
-                # print("gen")
+            # "generate" button, numbers get based on ~20 touch tests using "min-touch-ex.py"
+            elif touchx > 69 and touchx < 82 and touchy > 102:
+                logging.info("UI: gen")
                 post_sys_msg(f"Generating...")
                 model_gen(current_prompt)
-            # x,y ~= 120,120, clear
-            elif touchx > 110 and touchx < 130 and touchy > 110:
-                print("quit")
+            # "clear button", numbers get based on ~20 touch tests using "min-touch-ex.py"
+            elif touchx > 111 and touchx < 126 and touchy > 104:
+                logging.info("UI: quit")
                 post_sys_msg("Quitting...")
                 eink_display.stop()
                 flag_t = 0
-                eink_display.epd.Clear(0xFF)
-                eink_display.epd.sleep()
                 time.sleep(1)
+                eink_display.epd.Clear(0xFF)
+                # eink_display.epd.sleep()
+                time.sleep(2)
                 t.join()
                 epd2in13_V4.epdconfig.module_exit()
                 exit()

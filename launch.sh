@@ -37,4 +37,4 @@ export MODEL_PATH='/data/models/pi-deployment/04b-pre-x59-2405'
 export PROMPT_PATH='/boot/prompts-topics.txt'
 
 cd $WORKDIR &&
-python3 /root/workspace-rwkv/llm-epaper-demo/pi-demo.py
+python3 /root/workspace-rwkv/llm-epaper-demo/pi-demo.py 2>/boot/pi-demo.err 
