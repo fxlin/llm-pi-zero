@@ -161,3 +161,31 @@ To save memory, disable the desktop
 ```
 systemctl disable lightdm.service
 ```
+
+### To load 1.5B model or larger
+During model load (either i8 or fp16), the amount of memory needed (~5GB) will far exceed the "steady stage" memory during inference (~2.2GB), so the device with 4GB of DRAM will OOM. 
+opi zero + Ubunut 22 by default has zram swap on (using memory comperssion for swapping), which exacerbates this situation. 
+
+While some pytorch tricks may be played to aggressively GC memory during model loading (TBD), 
+we can use disk swap in lieu of zram, which allows model to load (slow, but will eventually load):
+
+```
+# execute as root
+
+fallocate -l 4G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+# Make It Permanent
+echo '/swapfile swap swap defaults 0 0' | tee -a /etc/fstab
+
+swapoff /dev/zram0
+systemctl stop zram-config
+systemctl disable zram-config
+
+# check
+swapon --show
+```
+
+
+
