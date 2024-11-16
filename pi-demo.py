@@ -172,6 +172,40 @@ class EInkDisplay:
         end_time = time.time()  # End measuring time
         print(f"Clr time: {end_time - start_time:.4f} seconds")
 
+    def print_load_progress(self, progress, msg=None):
+        # Ensure progress is between 0 and 1
+        progress = max(0.0, min(progress, 1.0))
+
+        # Define the coordinates for the progress bar
+        bar_width = self.xmax - 40
+        bar_height = 20
+        bar_x_start = (self.xmax - bar_width) // 2
+        bar_y_start = (self.ymax - bar_height) // 2
+        bar_x_end = bar_x_start + bar_width
+        bar_y_end = bar_y_start + bar_height
+
+        # Clear the previous progress bar area
+        self.base_draw.rectangle((bar_x_start, bar_y_start, bar_x_end, bar_y_end), fill=255)
+
+        # Draw the boundary of the progress bar
+        self.base_draw.rectangle((bar_x_start, bar_y_start, bar_x_end, bar_y_end), outline=0)
+
+        # Draw the new progress bar
+        filled_width = int(bar_width * progress)
+        self.base_draw.rectangle((bar_x_start, bar_y_start, bar_x_start + filled_width, bar_y_end), fill=0)
+
+        # Draw the message below the progress bar if provided
+        if msg:
+            msg_x = bar_x_start
+            msg_y = bar_y_end + 5  # Position below the progress bar
+            self.base_draw.text((msg_x, msg_y), msg, font=self.font_text, fill=0)
+
+        # Copy the base_image buffer for the display thread
+        with self.display_condition:
+            self.display_buffer = self.base_image.copy()
+            self.display_condition.notify()
+
+    # the primary entry for update text display
     # NB: (some) tokens from rwkv contains a leading (?) space already
     def print_token_scroll(self, token):
         # statistics 
@@ -646,6 +680,10 @@ else:
 try: 
     # emu only 
     if os.environ.get("EMU") == '1':
+        # first emulating loading model 
+        for i in range(10):
+            eink_display.print_load_progress(i*1.0/10, "hello world, load model abcdefg....")
+            time.sleep(1)
         text = '''
         In the heart of a bustling city lies a quaint little café, hidden away from the busy streets and towering skyscrapers. The café, named "The Hidden Petal," has an atmosphere that radiates warmth and nostalgia, reminiscent of a time when life moved more slowly and people lingered over their coffee without a care in the world. The walls are adorned with vintage photographs, faded floral wallpaper, and shelves lined with books of all sorts, inviting patrons to stay and lose themselves in their pages. Small wooden tables are arranged with a view of the large window, which frames a charming garden filled with colorful flowers and gentle vines. The aroma of freshly baked croissants, ground coffee beans, and the distant sound of soft jazz music fills the air, creating an ambiance that makes one want to curl up with a book and forget the passage of time. The patrons, a mix of regulars and curious newcomers, seem to speak in hushed tones, as if not wanting to disturb the delicate tranquility of the place. Here, it feels as if the hustle and hurry of the world are miles away, and for a moment, time stands still, allowing one to simply be
         '''
