@@ -38,7 +38,20 @@ While the ePaper is not specifically designed for the Orange Pi, it has good pin
 
 ## Software
 
+### SD card prep
+Grab a blank SD card (I used 32GB). 
+Before flash the image, manually create one partitions on the card, with size (total_size - 128 MB). 
+The idea is tht we will create a small FAT partition later for configuration/logs/prompts, etc. 
+
+### Flash OS 
+
 OS image: Orangepizero2w_1.0.2_ubuntu_jammy_server_linux6.1.31
+
+Flash the OS image to the first partition. Try boot and login. If evereything works OK, create the 2nd partition with FAT32, label "fat"; mount it under /mnt/fat, e.g. 
+
+```
+/dev/mmcblk0p2  /mnt/fat  auto  defaults  0  0
+```
 
 Use orangepi-config or raspi-config to enable SPI and I2C accesses.
 Cf the opi user manual. 
