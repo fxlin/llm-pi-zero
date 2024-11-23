@@ -61,6 +61,14 @@ Here is my selection that works:
 
 (if the program launches then quits, it could be b/c of that it failed to open the touch device on i2c. so check the selection)
 
+Check if touch interface can be detected (I2C addr: 0x14)
+```
+root@orangepizero2w: i2cdetect -y 3
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                         -- -- -- -- -- -- -- --
+10: -- -- -- -- 14 -- -- -- -- -- -- -- -- -- -- --
+```
+
 ### Run All Commands Below as Root
 
 ```
