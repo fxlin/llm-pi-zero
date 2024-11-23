@@ -69,6 +69,9 @@ root@orangepizero2w: i2cdetect -y 3
 10: -- -- -- -- 14 -- -- -- -- -- -- -- -- -- -- --
 ```
 
+Observation: Pi Sugar 3 (which also connects to the same I2C pins, addr 0x57, 0x68) can interfere with the touch screen's I2C communication. 
+In this case, gt.GT_Init() will fail and throw IOError. Without examing what was wrong with Pi Sugar 3, simply masking Pi Sugar's I2C pins (using plastic tape) fixed the problem.😂
+
 ### Run All Commands Below as Root
 
 ```
