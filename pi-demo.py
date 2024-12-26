@@ -23,7 +23,7 @@ import logging
 logging.basicConfig(
     stream=sys.stderr,         # Log to stderr
     level=logging.INFO,       # Set the minimum logging level to DEBUG
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  # Log message format
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s [%(filename)s:%(lineno)d]',  # Log message format with filename and line number
     datefmt='%Y-%m-%d %H:%M:%S'  # Date-time format
 )
 
@@ -782,22 +782,49 @@ try:
     #     model_gen()
     
     # --- geneation done, start the touch UI --- # 
+    '''
+    we may run w/o touch device (touch screen too big to fit in the case, which 
+    was designed fro eink display only). in such case, we do a "self demo" mode, 
+    which reload prompt and generate text
+    '''
+    has_touch = False 
+    try: 
+        # GT_Development -- stores information about the current touch points
+        gt = gt1151.GT1151()
+        GT_Dev = gt1151.GT_Development()
+        GT_Old = gt1151.GT_Development()
 
-    # GT_Development -- stores information about the current touch points
-    gt = gt1151.GT1151()
-    GT_Dev = gt1151.GT_Development()
-    GT_Old = gt1151.GT_Development()
-
-    gt.GT_Init()
-    # touch dev polling thread
-    t = threading.Thread(target = pthread_irq)
-    t.setDaemon(True)
-    t.start()
+        gt.GT_Init()
+        # touch dev polling thread
+        t = threading.Thread(target = pthread_irq)
+        t.setDaemon(True)
+        t.start()
+        has_touch = True
+    except Exception as e:
+        logging.error(f"touch device init failed: {e}. fall back to self-demo mode")
 
     # show the initial prompt
     current_prompt = random.choice(prompt_list).replace('\n', '')
     for token in current_prompt.split():  # send by tokens, otherwise wont auto change line
         eink_display.print_token_scroll(' '+token)
+
+    if not has_touch:
+        # self demo mode -- runs forever
+        while True:
+            # gen 
+            logging.info("(self-demo) UI: gen")
+            post_sys_msg(f"{model_string}:Generating...")
+            model_gen(current_prompt)            
+
+            # reload prompt & gen 
+            logging.info("(self-demo) UI: reload")
+            eink_display.clear_text_area(False)
+            current_prompt = random.choice(prompt_list)
+            eink_display.print_token_scroll(current_prompt.replace('\n', ''))
+            eink_display.clear_text_area(False)
+            current_prompt = random.choice(prompt_list)
+            eink_display.print_token_scroll(current_prompt.replace('\n', ''))
+        # --- runs forever ---
 
     # the main UI loop, touch event handling
     while (1):
