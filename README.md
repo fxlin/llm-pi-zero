@@ -144,11 +144,18 @@ Download a model from Hugging Face(https://huggingface.co/BlinkDL) like this one
 
 My model paths are /data/models/pi-deployment/ 
 
-## Finish up
+## Start on boot
+
+Now create a FAT32 partition on the sd card, spanning the remaining space (see above). Then 
+```
+mkdir -p /mnt/fat
+echo "/dev/mmcblk0p2  /mnt/fat  auto  defaults  0  0" >> /etc/fstab
+```
 
 Enable the service to start on boot
 ```
-cp launch.sh /boot/
+cp launch.sh /mnt/fat
+
 # so that it can be easily modified from PC/Mac
 
 cp pi-demo.service /etc/systemd/system/

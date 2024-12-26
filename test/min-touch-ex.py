@@ -4,6 +4,7 @@
 # GT_Development -- stores information about the current touch points
 import threading
 import logging
+import time
 
 from TP_lib import gt1151, epd2in13_V4
 
@@ -50,6 +51,8 @@ try:
     GT_Old = gt1151.GT_Development()
 
     epd.init(epd.FULL_UPDATE)   # must do this, otherwise, touch won't work (io error)
+    print("epd init done")
+    # time.sleep(1.0)
     gt.GT_Init()
 
     # touch dev polling thread
@@ -91,7 +94,8 @@ try:
 
 except IOError as e:
     print("io error")
-    logging.info(e)
+    # logging.info(e)
+    logging.error("An IOError occurred", exc_info=True)
 
 except KeyboardInterrupt:    
     logging.info("ctrl + c:")

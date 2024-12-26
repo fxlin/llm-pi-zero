@@ -874,7 +874,8 @@ try:
     sys.exit(0)
             
 except IOError as e:
-    logging.info(e)
+    # logging.info(e)
+    logging.error("An IOError occurred", exc_info=True)
 
 except KeyboardInterrupt:    
     logging.info("ctrl + c:")
