@@ -38,7 +38,20 @@ While the ePaper is not specifically designed for the Orange Pi, it has good pin
 
 ## Software
 
+### SD card prep
+Grab a blank SD card (I used 32GB). 
+Before flash the image, manually create one partitions on the card, with size (total_size - 128 MB). 
+The idea is tht we will create a small FAT partition later for configuration/logs/prompts, etc. 
+
+### Flash OS 
+
 OS image: Orangepizero2w_1.0.2_ubuntu_jammy_server_linux6.1.31
+
+Flash the OS image to the first partition. Try boot and login. If evereything works OK, create the 2nd partition with FAT32, label "fat"; mount it under /mnt/fat, e.g. 
+
+```
+/dev/mmcblk0p2  /mnt/fat  auto  defaults  0  0
+```
 
 Use orangepi-config or raspi-config to enable SPI and I2C accesses.
 Cf the opi user manual. 
@@ -47,6 +60,17 @@ Here is my selection that works:
 ![image](https://github.com/user-attachments/assets/d1af70e9-b3d0-4be5-a19a-c1bf87d3800c)
 
 (if the program launches then quits, it could be b/c of that it failed to open the touch device on i2c. so check the selection)
+
+Check if touch interface can be detected (I2C addr: 0x14)
+```
+root@orangepizero2w: i2cdetect -y 3
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                         -- -- -- -- -- -- -- --
+10: -- -- -- -- 14 -- -- -- -- -- -- -- -- -- -- --
+```
+
+**A bug?**: Pi Sugar 3 (which also connects to the same I2C pins, addr 0x57, 0x68) can interfere with the touch screen's I2C communication. 
+In this case, gt.GT_Init() will fail and throw IOError. Without examing what was wrong with Pi Sugar 3, simply masking Pi Sugar's I2C pins (using plastic tape) fixed the problem.😂
 
 ### Run All Commands Below as Root
 
