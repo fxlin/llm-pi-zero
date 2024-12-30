@@ -15,6 +15,9 @@ https://github.com/user-attachments/assets/98b9d58a-7660-4d4d-97ee-e885c9d1ae21
 - Waveshare 2.13inch Touch e-Paper Display - $27 [Amazon](https://www.amazon.com/dp/B0BZDVZ7NR?ref=ppx_yo2ov_dt_b_fed_asin_title&th=1)
   - 2in13_V4, 250x122
   - https://www.waveshare.com/wiki/2.13inch_Touch_e-Paper_HAT_Manual
+- (Non-touch version) - waveshare 2.13inch E-Ink Display HAT V4 - $22 [Amazon](https://www.amazon.com/gp/product/B071S8HT76/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1)
+  - 2in13_V4, 250x122
+  - https://www.waveshare.com/wiki/2.13inch_e-Paper_HAT_Manual
 
 Whole system ~= 2.5 Watt when busy, ~= 1 Watt when idle (can be optimized)
 

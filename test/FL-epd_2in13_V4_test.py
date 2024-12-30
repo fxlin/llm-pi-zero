@@ -4,6 +4,7 @@
 
 '''
 xzl: only display, no touch
+cf: https://github.com/waveshareteam/e-Paper/blob/master/RaspberryPi_JetsonNano/python/examples/epd_2in13_V4_test.py
 '''
 
 import sys
@@ -14,7 +15,8 @@ if os.path.exists(libdir):
     sys.path.append(libdir)
 
 import logging
-from waveshare_epd import epd2in13_V4
+# from waveshare_epd import epd2in13_V4     # fxl: old
+from TP_lib import epd2in13_V4
 import time
 from PIL import Image,ImageDraw,ImageFont
 import traceback
@@ -26,7 +28,7 @@ try:
     
     epd = epd2in13_V4.EPD()
     logging.info("init and Clear")
-    epd.init()
+    epd.init(epd.PART_UPDATE)
     epd.Clear(0xFF)
 
     # breakpoint()
@@ -36,7 +38,7 @@ try:
     
     if 1:
         logging.info("E-paper refresh")
-        epd.init()
+        epd.init(epd)
 
         # xzl
         font_title = font24
@@ -84,6 +86,8 @@ try:
             # Move to the next line position
             y_position += 20
 
+        epd.Clear(0xFF)
+        
         #######################################
 
         # Create the base image with the title
@@ -152,8 +156,6 @@ try:
         image1.paste(bmp, (2,2))    
         epd.display(epd.getbuffer(image1))
         time.sleep(2)
-        
-       
     else:
         logging.info("E-paper refreshes quickly")
         epd.init_fast()
@@ -209,7 +211,7 @@ try:
             break
     
     logging.info("Clear...")
-    epd.init()
+    epd.init(epd.FULL_UPDATE)
     epd.Clear(0xFF)
     
     logging.info("Goto Sleep...")

@@ -1,5 +1,11 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
+
+
+'''
+fxl: works for both touch and non-touch display 
+'''
+
 import sys
 import os
 picdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'pic/2in13')
